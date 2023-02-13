@@ -2,6 +2,7 @@ import numpy as np
 import pylab
 import matplotlib.pyplot as plt
 import copy
+from qiskit import *
 from qiskit import BasicAer, Aer
 from qiskit_nature.drivers import Molecule
 from qiskit_nature.settings import settings
@@ -22,15 +23,17 @@ from qiskit.opflow import TwoQubitReduction
 from qiskit_nature.algorithms import (GroundStateEigensolver,
                                       NumPyMinimumEigensolverFactory)
 from qiskit.algorithms.optimizers import SLSQP, COBYLA
-from qiskit import IBMQ
-IBMQ.load_account()
+from qiskit import IBMQ, QuantumCircuit
+from qiskit.circuit import Parameter
 import qiskit.tools.jupyter
 from qiskit.circuit.library import EfficientSU2
 from qiskit.providers.fake_provider import FakeManila
 from qiskit.providers.aer.noise import NoiseModel
 from qiskit.utils.mitigation import CompleteMeasFitter
 %qiskit_job_watcher
-distances = np.arange(0.5, 3.0, 0.1)
+
+IBMQ.load_account()
+distances = np.arange(0.5, 3.5, 0.1)
 vqe_energies = []
 hf_energies = []
 exact_energies = []
@@ -81,7 +84,6 @@ for i,d in enumerate(distances):
     qubit_op = converter.convert(hamiltonian)
     qubit_op = reducer.convert(qubit_op)
 
-    
    
 
     #Exact Result
@@ -99,18 +101,30 @@ for i,d in enumerate(distances):
     #VQE
     
     initial_state = HartreeFock(num_spin_orbitals, num_particles, converter)
-    ansatz = UCCSD(converter,
-                     num_particles,
-                     num_spin_orbitals,
-                     initial_state=initial_state)
     
-    ansatz2 = EfficientSU2(qubit_op.num_qubits, entanglement="linear")
+    qu = QuantumRegister(qubit_op.num_qubits)
+    qc = QuantumCircuit(qu)
+    theta = [Parameter(f"theta_{i}") for i in range(qubit_op.num_qubits)]
+#    theta = np.random.uniform(0, 2*np.pi, n)
+    for i in range(qubit_op.num_qubits-1):
+        qc.ry(theta[i], qu[i])
+        qc.rx(theta[i+1], qu[i+1])
+        qc.cx(qu[i],qu[i+1])
+#    ansatz = UCCSD(converter,
+#                     num_particles,
+#                     num_spin_orbitals,
+#                     initial_state=initial_state)
     
-    vqe = VQE(ansatz, optimizer, quantum_instance = backend0)
+    ansatz = EfficientSU2(qubit_op.num_qubits, entanglement="linear")
+    
+    vqe = VQE(ansatz, optimizer, quantum_instance = backend2)
     vqe_calc = vqe.compute_minimum_eigenvalue(qubit_op)
     vqe_result = problem.interpret(vqe_calc).total_energies[0].real
     vqe_energies.append(vqe_result)
+    
+    
 #    print(vqe_energies)
+    
     
     
 plt.plot(distances, exact_energies, label = 'Exact Energy')
