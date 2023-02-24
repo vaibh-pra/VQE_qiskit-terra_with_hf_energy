@@ -8,6 +8,8 @@ from sympy import *
 # Define the black-box function f
 f = '111'
 
+#Reverse the function string f
+rev_f = f[::-1]
 
 
 # Create the circuit
@@ -52,8 +54,9 @@ for key in cts:
     for i in range(len(z)):
         row.append(int(z[i]))
     coeff.append(row)
-print(np.array(coeff), b)
+
+# Store coeffcient information in a matrix
 A = np.array(coeff)
-x = np.linalg.solve(A, b)
-print(x)
+print(A)
+
 plot_histogram(cts)
