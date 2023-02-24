@@ -24,7 +24,7 @@ qc.h(range(n))
 qc.barrier()
 
 # Apply the black-box function f
-qc2 = simon_oracle(f)
+qc2 = simon_oracle(rev_f)
 qc.compose(qc2, inplace=True)
 
 qc.barrier()
