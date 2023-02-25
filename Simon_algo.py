@@ -44,7 +44,7 @@ result = backend.run(job).result()
 cts = result.get_counts()
 del cts['000']
 
-#extract key strings(final measured states) from counts dictionary.
+#Extract key strings(final measured states) from counts dictionary.
 b = np.zeros(len(cts))
 coeff = []
 for key in cts:
@@ -55,7 +55,7 @@ for key in cts:
         row.append(int(z[i]))
     coeff.append(row)
 
-# Store final measured states in a matrix
+#Store final measured states in a matrix
 A = np.array(coeff)
 print(A)
 
