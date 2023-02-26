@@ -55,7 +55,7 @@ for key in cts:
         row.append(int(z[i]))
     coeff.append(row)
 
-#Store final measured states in a matrix
+#Store final measured states in coefficient matrix A
 A = np.array(coeff)
 print(A)
 
